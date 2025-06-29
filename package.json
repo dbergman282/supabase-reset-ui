@@ -15,5 +15,10 @@
     "@supabase/auth-ui-react": "latest",
     "@supabase/auth-ui-shared": "latest",
     "@supabase/auth-helpers-nextjs": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest"
   }
 }
