@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// ✅ Supabase client with env vars
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -9,9 +10,11 @@ const supabase = createClient(
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [session, setSession] = useState(null);
   const [message, setMessage] = useState("");
 
+  // ✅ On page load: parse #access_token + set session
   useEffect(() => {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1));
@@ -25,48 +28,93 @@ export default function ResetPassword() {
       }).then(({ data, error }) => {
         if (error) {
           console.error(error);
-          setMessage("Failed to set session");
+          setMessage("❌ Failed to set session");
         } else {
           setSession(data.session);
         }
       });
     } else {
-      setMessage("Auth session missing!");
+      setMessage("❌ Auth session missing!");
     }
   }, []);
 
+  // ✅ Matches your Streamlit password rules
+  function passwordValid(password: string) {
+    return (
+      password.length >= 8 &&
+      /[A-Za-z]/.test(password) &&
+      /\d/.test(password) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    );
+  }
+
+  // ✅ Update handler: checks match + rules
   const handleUpdate = async () => {
+    setMessage("");
+
+    if (password !== confirmPassword) {
+      setMessage("❌ Passwords do not match.");
+      return;
+    }
+
+    if (!passwordValid(password)) {
+      setMessage(
+        "❌ Password must be at least 8 characters, include a letter, a number, and a special character."
+      );
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       console.error(error);
-      setMessage(error.message);
+      setMessage(`❌ ${error.message}`);
     } else {
-      setMessage("✅ Password updated! Return to your app to log in.");
+      setMessage("✅ Password updated! You can return to your app.");
     }
   };
 
   return (
     <main style={{ maxWidth: 400, margin: "2rem auto", textAlign: "center" }}>
-      <h1>Reset Password</h1>
+      <h1>🔒 Reset Password</h1>
+
       {session ? (
         <>
+          <p style={{ fontSize: "0.9rem", margin: "0.5rem 0", color: "#555" }}>
+            Your new password must:
+            <br />• Be at least 8 characters
+            <br />• Include a letter, a number, and a special character
+          </p>
+
           <input
             type="password"
             placeholder="New password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ margin: "1rem 0", padding: "0.5rem", width: "100%" }}
+            style={{ margin: "0.5rem 0", padding: "0.5rem", width: "100%" }}
           />
+
+          <input
+            type="password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            style={{ margin: "0.5rem 0", padding: "0.5rem", width: "100%" }}
+          />
+
           <button onClick={handleUpdate} style={{ padding: "0.5rem 1rem" }}>
             Update Password
           </button>
         </>
       ) : (
-        <p>{message || "Loading..."}</p>
+        <p>{message || "Loading session..."}</p>
       )}
-      {message && <p>{message}</p>}
-      <p style={{ marginTop: "1rem" }}>
-        <a href="https://gamificationinstructorapp.streamlit.app">← Back to your App</a>
+
+      {message && <p style={{ marginTop: "1rem" }}>{message}</p>}
+
+      <p style={{ marginTop: "1.5rem" }}>
+        <a href="https://gamificationinstructorapp.streamlit.app">
+          ← Back to your Streamlit App
+        </a>
       </p>
     </main>
   );
