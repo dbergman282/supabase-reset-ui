@@ -112,7 +112,7 @@ export default function ResetPassword() {
 
       <p style={{ marginTop: "1.5rem" }}>
         <a href="https://gamificationinstructorapp.streamlit.app">
-          ← Back to your Streamlit App
+          ← Back to Gamification State instructor app
         </a>
       </p>
     </main>
