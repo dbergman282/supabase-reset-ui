@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// ✅ Supabase client with env vars
+// ✅ Create Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -14,7 +14,7 @@ export default function ResetPassword() {
   const [session, setSession] = useState(null);
   const [message, setMessage] = useState("");
 
-  // ✅ On page load: parse #access_token + set session
+  // ✅ This part STAYS EXACTLY THE SAME
   useEffect(() => {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1));
@@ -48,7 +48,6 @@ export default function ResetPassword() {
     );
   }
 
-  // ✅ Update handler: checks match + rules
   const handleUpdate = async () => {
     setMessage("");
 
@@ -59,7 +58,7 @@ export default function ResetPassword() {
 
     if (!passwordValid(password)) {
       setMessage(
-        "❌ Password must be at least 8 characters, include a letter, a number, and a special character."
+        "❌ Password must be at least 8 characters and include a letter, a number, and a special character."
       );
       return;
     }
